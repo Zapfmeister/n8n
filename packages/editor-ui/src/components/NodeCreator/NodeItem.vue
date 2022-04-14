@@ -28,9 +28,16 @@
 			</div>
 
 			<div :class="$style['draggable-data-transfer']" ref="draggableDataTransfer" />
-			<div :class="$style.draggable" :style="{ top: `${draggablePosition.y}px`, left: `${draggablePosition.x}px` }" ref="draggable" v-show="dragging">
-				<NodeIcon class="node-icon" :nodeType="nodeType" :size="40" :shrink="false" />
-			</div>
+			<transition name="node-item-transition">
+				<div
+					:class="$style.draggable"
+					:style="draggableStyle"
+					ref="draggable"
+					v-show="dragging"
+				>
+					<NodeIcon class="node-icon" :nodeType="nodeType" :size="40" :shrink="false" />
+				</div>
+			</transition>
 		</div>
 	</div>
 </template>
@@ -78,6 +85,12 @@ export default Vue.extend({
 		isTrigger (): boolean {
 			return this.nodeType.group.includes('trigger');
 		},
+		draggableStyle(): { top: string; left: string; } {
+			return {
+				top: `${this.draggablePosition.y}px`,
+				left: `${this.draggablePosition.x}px`,
+			};
+		},
 	},
 	mounted() {
 		/**
@@ -123,7 +136,9 @@ export default Vue.extend({
 			});
 
 			this.$data.dragging = false;
-			this.$data.draggablePosition = { x: -100, y: -100 };
+			setTimeout(() => {
+				this.$data.draggablePosition = { x: -100, y: -100 };
+			}, 300);
 		},
 	},
 });
@@ -190,5 +205,22 @@ export default Vue.extend({
 .draggable-data-transfer {
 	width: 1px;
 	height: 1px;
+}
+</style>
+
+<style lang="scss" scoped>
+.node-item-transition {
+	&-enter-active,
+	&-leave-active {
+		transition-property: opacity, transform;
+		transition-duration: 300ms;
+		transition-timing-function: ease;
+	}
+
+	&-enter,
+	&-leave-to {
+		opacity: 0;
+		transform: scale(0);
+	}
 }
 </style>
